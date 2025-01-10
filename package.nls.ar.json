@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "نسخ المرجع",
+    "extension.copyReference.description": "نسخ مسار المرجع مثل IntelliJ IDEA",
+    "extension.copyReference.noEditor": "الرجاء فتح ملف في المحرر",
+    "extension.copyReference.copied": "تم نسخ مسار المرجع إلى الحافظة",
+    "extension.copyReference.failed": "تعذر الحصول على مسار المرجع، تأكد من أن المؤشر على اسم الفئة أو الطريقة"
+} 

@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "参照をコピー",
+    "extension.copyReference.description": "IntelliJ IDEAのように参照パスをコピー",
+    "extension.copyReference.noEditor": "エディタでファイルを開いてください",
+    "extension.copyReference.copied": "参照パスをクリップボードにコピーしました",
+    "extension.copyReference.failed": "参照パスを取得できません。カーソルがクラス名またはメソッド名にあることを確認してください"
+} 

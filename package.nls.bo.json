@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "ཁུངས་སྦྲེལ་པར་བཤུ།",
+    "extension.copyReference.description": "IntelliJ IDEA དང་འདྲ་བའི་ཁུངས་སྦྲེལ་ལམ་བུ་པར་བཤུ།",
+    "extension.copyReference.noEditor": "རྩོམ་སྒྲིག་ཆས་ནང་ཡིག་ཆ་ཁ་ཕྱེ།",
+    "extension.copyReference.copied": "ཁུངས་སྦྲེལ་ལམ་བུ་དྲན་པང་དུ་པར་བཤུས་བྱས་ཟིན།",
+    "extension.copyReference.failed": "ཁུངས་སྦྲེལ་ལམ་བུ་ལེན་མ་ཐུབ། འོད་རྟགས་འཛིན་གྲྭའམ་ཐབས་ཤེས་མིང་ཐོག་ཏུ་ཡོད་པ་ངེས་བརྟན་བྱོས།"
+} 

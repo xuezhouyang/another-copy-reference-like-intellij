@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "Referenz kopieren",
+    "extension.copyReference.description": "Referenzpfad wie in IntelliJ IDEA kopieren",
+    "extension.copyReference.noEditor": "Bitte öffnen Sie eine Datei im Editor",
+    "extension.copyReference.copied": "Referenzpfad in die Zwischenablage kopiert",
+    "extension.copyReference.failed": "Referenzpfad konnte nicht ermittelt werden, stellen Sie sicher, dass der Cursor auf einem Klassen- oder Methodennamen steht"
+} 

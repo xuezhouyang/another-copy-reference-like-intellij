@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "संदर्भ कॉपी करें",
+    "extension.copyReference.description": "IntelliJ IDEA की तरह संदर्भ पथ कॉपी करें",
+    "extension.copyReference.noEditor": "कृपया एडिटर में फ़ाइल खोलें",
+    "extension.copyReference.copied": "संदर्भ पथ क्लिपबोर्ड पर कॉपी किया गया",
+    "extension.copyReference.failed": "संदर्भ पथ प्राप्त नहीं कर सका, सुनिश्चित करें कि कर्सर क्लास या मेथड नाम पर है"
+} 

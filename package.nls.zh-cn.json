@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "复制引用路径",
+    "extension.copyReference.description": "复制类似 IntelliJ IDEA 的引用路径",
+    "extension.copyReference.noEditor": "请在编辑器中打开文件",
+    "extension.copyReference.copied": "引用路径已复制到剪贴板",
+    "extension.copyReference.failed": "无法获取引用路径，请确保光标位于类名或方法名上"
+} 

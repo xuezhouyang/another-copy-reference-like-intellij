@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "Копировать ссылку",
+    "extension.copyReference.description": "Копировать путь ссылки как в IntelliJ IDEA",
+    "extension.copyReference.noEditor": "Пожалуйста, откройте файл в редакторе",
+    "extension.copyReference.copied": "Путь ссылки скопирован в буфер обмена",
+    "extension.copyReference.failed": "Не удалось получить путь ссылки, убедитесь, что курсор находится на имени класса или метода"
+} 

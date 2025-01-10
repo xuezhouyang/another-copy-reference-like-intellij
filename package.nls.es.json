@@ -1,0 +1,7 @@
+{
+    "extension.copyReference.title": "Copiar Referencia",
+    "extension.copyReference.description": "Copiar ruta de referencia como IntelliJ IDEA",
+    "extension.copyReference.noEditor": "Por favor, abra un archivo en el editor",
+    "extension.copyReference.copied": "Ruta de referencia copiada al portapapeles",
+    "extension.copyReference.failed": "No se puede obtener la ruta de referencia, asegúrese de que el cursor esté en el nombre de la clase o método"
+} 
