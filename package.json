@@ -28,6 +28,8 @@
         "theme": "dark"
     },
     "activationEvents": [
+        "onLanguage:java",
+        "onLanguage:kotlin",
         "onCommand:extension.copyReference"
     ],
     "main": "./out/extension.js",
@@ -42,7 +44,8 @@
             "editor/context": [
                 {
                     "command": "extension.copyReference",
-                    "group": "navigation"
+                    "group": "navigation",
+                    "when": "editorLangId == java || editorLangId == kotlin"
                 }
             ]
         },
@@ -50,7 +53,8 @@
             {
                 "command": "extension.copyReference",
                 "key": "alt+shift+c",
-                "mac": "cmd+shift+c"
+                "mac": "cmd+shift+c",
+                "when": "editorLangId == java || editorLangId == kotlin"
             }
         ]
     },
