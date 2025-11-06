@@ -1,127 +1,289 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
+import { ILanguageHandler } from './types';
+import { ClipboardManager } from './utils/clipboard';
+import { LocalizationManager } from './utils/localization';
+import { CacheManager } from './utils/cache';
+import { TelemetryReporter, TelemetryEvents } from './utils/telemetry';
+import { registerBenchmarkCommand } from './utils/benchmarks';
+import { registerFeedbackCommand } from './utils/feedback';
+import { UniversalHandler } from './handlers/universal';
+import { JavaScriptHandler } from './handlers/javascript';
+import { PythonHandler } from './handlers/python';
+import { MarkdownHandler } from './handlers/markdown';
+import { HtmlHandler } from './handlers/html';
+import { YamlHandler } from './handlers/yaml';
+import { FlutterHandler } from './handlers/flutter';
 
-export function activate(context: vscode.ExtensionContext) {
-    let disposable = vscode.commands.registerCommand('extension.copyReference', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showInformationMessage(vscode.l10n.t('extension.copyReference.noEditor'));
-            return;
+/**
+ * Handler registry for managing language-specific handlers
+ */
+class HandlerRegistry {
+    private handlers = new Map<string, ILanguageHandler>();
+    private fallbackHandler: ILanguageHandler | null = null;
+
+    /**
+     * Register a language handler
+     */
+    register(handler: ILanguageHandler): void {
+        // Register by language ID
+        this.handlers.set(handler.languageId, handler);
+
+        // Also register by file extensions
+        handler.fileExtensions.forEach(ext => {
+            const key = `ext:${ext}`;
+            const existing = this.handlers.get(key);
+            // Keep handler with higher priority
+            if (!existing || handler.priority > existing.priority) {
+                this.handlers.set(key, handler);
+            }
+        });
+    }
+
+    /**
+     * Set the fallback handler for unsupported languages
+     */
+    setFallback(handler: ILanguageHandler): void {
+        this.fallbackHandler = handler;
+    }
+
+    /**
+     * Get the appropriate handler for a document
+     */
+    getHandler(document: vscode.TextDocument): ILanguageHandler | null {
+        // Try to get handler by language ID first
+        let handler = this.handlers.get(document.languageId);
+
+        if (handler && handler.canHandle(document)) {
+            return handler;
         }
 
-        const reference = await generateReference(editor);
-        if (reference) {
-            await vscode.env.clipboard.writeText(reference);
-            vscode.window.showInformationMessage(vscode.l10n.t('extension.copyReference.copied'));
-        } else {
-            vscode.window.showInformationMessage(vscode.l10n.t('extension.copyReference.failed'));
+        // Try by file extension
+        const ext = document.fileName.split('.').pop();
+        if (ext) {
+            handler = this.handlers.get(`ext:${ext}`);
+            if (handler && handler.canHandle(document)) {
+                return handler;
+            }
+        }
+
+        // Check all registered handlers in priority order
+        const sortedHandlers = Array.from(this.handlers.values())
+            .filter((h, i, arr) => arr.indexOf(h) === i) // Remove duplicates
+            .sort((a, b) => b.priority - a.priority);
+
+        for (const h of sortedHandlers) {
+            if (h.canHandle(document)) {
+                return h;
+            }
+        }
+
+        // Return fallback handler if no specific handler found
+        return this.fallbackHandler;
+    }
+
+    /**
+     * Get all registered handlers
+     */
+    getAllHandlers(): ILanguageHandler[] {
+        const uniqueHandlers = new Set(this.handlers.values());
+        return Array.from(uniqueHandlers);
+    }
+
+    /**
+     * Check if a language is supported
+     */
+    isLanguageSupported(languageId: string): boolean {
+        return this.handlers.has(languageId) || this.fallbackHandler !== null;
+    }
+
+    /**
+     * Clear all handlers (useful for testing)
+     */
+    clear(): void {
+        this.handlers.clear();
+        this.fallbackHandler = null;
+    }
+}
+
+// Global handler registry instance
+const handlerRegistry = new HandlerRegistry();
+
+/**
+ * Extension activation
+ */
+export function activate(context: vscode.ExtensionContext) {
+    // Initialize cache manager
+    const cacheManager = CacheManager.getInstance();
+
+    // Initialize telemetry reporter
+    const telemetry = TelemetryReporter.getInstance();
+    telemetry.initialize(context);
+    telemetry.trackEvent(TelemetryEvents.FEATURE_USAGE, { feature: 'extension_activated' });
+
+    // Register all language handlers
+    registerHandlers();
+
+    // Register the main copy reference command
+    const copyReferenceCommand = vscode.commands.registerCommand('extension.copyReference', async () => {
+        await handleCopyReference();
+    });
+
+    // Register configuration change listener
+    const configChangeListener = vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('copyReference')) {
+            // Clear cache when configuration changes
+            cacheManager.clearAll();
         }
     });
 
-    context.subscriptions.push(disposable);
-}
+    // Register document change listener for cache invalidation
+    const documentChangeListener = vscode.workspace.onDidChangeTextDocument(e => {
+        // Clear cache for modified document
+        cacheManager.clear(e.document.uri);
+    });
 
-async function generateReference(editor: vscode.TextEditor): Promise<string | undefined> {
-    const document = editor.document;
-    const position = editor.selection.active;
-    
-    // 获取所有符号
-    const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-        'vscode.executeDocumentSymbolProvider',
-        document.uri
+    // Register document close listener
+    const documentCloseListener = vscode.workspace.onDidCloseTextDocument(doc => {
+        // Clear cache for closed document
+        cacheManager.clear(doc.uri);
+    });
+
+    // Register benchmark command (only in development mode)
+    if (context.extensionMode === vscode.ExtensionMode.Development) {
+        registerBenchmarkCommand(context);
+    }
+
+    // Register feedback command
+    registerFeedbackCommand(context);
+
+    // Add all disposables to subscriptions
+    context.subscriptions.push(
+        copyReferenceCommand,
+        configChangeListener,
+        documentChangeListener,
+        documentCloseListener
     );
 
-    if (!symbols) {
-        return undefined;
-    }
-
-    // 获取包名
-    const packageName = await getPackageName(document.uri);
-    if (!packageName) {
-        return undefined;
-    }
-
-    // 查找当前位置的符号和其父符号
-    const { classSymbol, methodSymbol } = findSymbolsAtPosition(symbols, position);
-    
-    if (!classSymbol) {
-        return undefined;
-    }
-
-    // 如果找到方法符号，返回 "包名.类名#方法名" 格式
-    if (methodSymbol) {
-        return `${packageName}.${classSymbol.name}#${methodSymbol.name}`;
-    }
-
-    // 否则只返回 "包名.类名" 格式
-    return `${packageName}.${classSymbol.name}`;
+    // Log activation
+    console.log('Copy Reference extension activated');
 }
 
-interface SymbolResult {
-    classSymbol?: vscode.DocumentSymbol;
-    methodSymbol?: vscode.DocumentSymbol;
+/**
+ * Register all language handlers
+ */
+function registerHandlers(): void {
+    // Clear any existing handlers
+    handlerRegistry.clear();
+
+    // Register language-specific handlers
+    handlerRegistry.register(new JavaScriptHandler());
+    handlerRegistry.register(new PythonHandler());
+    handlerRegistry.register(new MarkdownHandler());
+    handlerRegistry.register(new HtmlHandler());
+    handlerRegistry.register(new YamlHandler());
+    handlerRegistry.register(new FlutterHandler());
+
+    // Register universal handler as fallback for any unsupported file type
+    handlerRegistry.setFallback(new UniversalHandler());
+
+    console.log('Registered JavaScriptHandler, PythonHandler, MarkdownHandler, HtmlHandler, YamlHandler, FlutterHandler, and UniversalHandler as fallback');
 }
 
-function findSymbolsAtPosition(
-    symbols: vscode.DocumentSymbol[],
-    position: vscode.Position,
-    parentSymbol?: vscode.DocumentSymbol
-): SymbolResult {
-    for (const symbol of symbols) {
-        if (symbol.range.contains(position)) {
-            // 如果是类
-            if (symbol.kind === vscode.SymbolKind.Class || 
-                symbol.kind === vscode.SymbolKind.Interface) {
-                // 检查是否有子方法包含该位置
-                for (const child of symbol.children) {
-                    if (child.kind === vscode.SymbolKind.Method && 
-                        child.range.contains(position)) {
-                        return {
-                            classSymbol: symbol,
-                            methodSymbol: child
-                        };
-                    }
-                }
-                return { classSymbol: symbol };
-            }
-            
-            // 如果是方法且有父符号
-            if (symbol.kind === vscode.SymbolKind.Method && parentSymbol) {
-                return {
-                    classSymbol: parentSymbol,
-                    methodSymbol: symbol
-                };
-            }
+/**
+ * Handle the copy reference command
+ */
+async function handleCopyReference(): Promise<void> {
+    const telemetry = TelemetryReporter.getInstance();
+    const startTime = Date.now();
+    const editor = vscode.window.activeTextEditor;
 
-            // 递归检查子符号
-            if (symbol.children.length > 0) {
-                const result = findSymbolsAtPosition(symbol.children, position, symbol);
-                if (result.classSymbol || result.methodSymbol) {
-                    return result;
-                }
-            }
-        }
+    // Check if editor is available
+    if (!editor) {
+        vscode.window.showInformationMessage(
+            LocalizationManager.getMessage('extension.copyReference.noEditor')
+        );
+        telemetry.trackEvent(TelemetryEvents.COPY_REFERENCE, { result: 'no_editor' });
+        return;
     }
-    return {};
-}
 
-async function getPackageName(uri: vscode.Uri): Promise<string | undefined> {
+    const document = editor.document;
+    const position = editor.selection.active;
+
+    // Get the appropriate handler
+    const handler = handlerRegistry.getHandler(document);
+
+    if (!handler) {
+        vscode.window.showErrorMessage(
+            LocalizationManager.getMessage('extension.copyReference.noHandler')
+        );
+        telemetry.trackEvent(TelemetryEvents.COPY_REFERENCE, {
+            result: 'no_handler',
+            languageId: document.languageId
+        });
+        return;
+    }
+
     try {
-        const content = await fs.promises.readFile(uri.fsPath, 'utf-8');
-        const lines = content.split('\n');
-        
-        // 查找 package 语句
-        for (const line of lines) {
-            const packageMatch = line.match(/package\s+([\w.]+)/);
-            if (packageMatch) {
-                return packageMatch[1].trim();
+        // Extract reference using the handler
+        const reference = await handler.extractReference(document, position);
+
+        if (!reference) {
+            vscode.window.showInformationMessage(
+                LocalizationManager.getMessage('extension.copyReference.failed')
+            );
+            telemetry.trackLanguageUsage(document.languageId, handler.languageId, false);
+            return;
+        }
+
+        // Copy to clipboard
+        const referenceText = reference.toString();
+        const success = await ClipboardManager.writeText(referenceText);
+
+        if (success) {
+            // Show success message with reference preview
+            const message = LocalizationManager.getMessage(
+                'extension.copyReference.copied'
+            );
+            vscode.window.showInformationMessage(`${message}: ${referenceText}`);
+
+            // Track successful operation
+            const duration = Date.now() - startTime;
+            telemetry.trackLanguageUsage(document.languageId, handler.languageId, true);
+            telemetry.trackPerformance('copyReference', duration);
+
+            // Track framework if detected
+            if (reference.frameworkType) {
+                telemetry.trackEvent(TelemetryEvents.FRAMEWORK_DETECTED, {
+                    framework: reference.frameworkType,
+                    languageId: document.languageId
+                });
             }
         }
+
     } catch (error) {
-        console.error('Error reading file:', error);
+        console.error('Error generating reference:', error);
+        vscode.window.showErrorMessage(
+            LocalizationManager.getMessage('extension.copyReference.failed')
+        );
+        telemetry.trackError(error as Error, 'copyReference');
     }
-    return undefined;
 }
 
-export function deactivate() {} 
+/**
+ * Extension deactivation
+ */
+export function deactivate() {
+    // Clear cache on deactivation
+    const cacheManager = CacheManager.getInstance();
+    cacheManager.clearAll();
+
+    // Clear handler registry
+    handlerRegistry.clear();
+
+    console.log('Copy Reference extension deactivated');
+}
+
+/**
+ * Export registry for testing
+ */
+export { handlerRegistry };

@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+build/
+coverage/
+.vscode-test/
+*.min.js
+*.bundle.js
