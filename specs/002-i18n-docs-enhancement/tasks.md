@@ -29,14 +29,14 @@ description: "Comprehensive task list for i18n documentation enhancement impleme
 
 **Purpose**: Project initialization and basic structure for i18n enhancement
 
-- [ ] T001 [P] Create docs/i18n/ directory structure for comprehensive language reference documentation and terminology guides
-- [ ] T002 [P] Create scripts/ directory if not exists for validation, conversion, and automation tools
-- [ ] T003 Install opencc-js package (v1.1.x or latest) as devDependency in package.json for Simplified to Traditional Chinese conversion
-- [ ] T004 Create scripts/validate-docs-parity.js with initial structure: imports, main validation function, code block extraction, hash comparison logic
-- [ ] T005 Create scripts/validate-terminology.js with prohibited terms list (Tibet, Macau, East Turkestan, ROC) and required terms list (Xizang, Macao, HKSAR, Taiwan Province P.R.C, Xinjiang Uygur AR)
-- [ ] T006 Create scripts/generate-zh-tw.js with OpenCC initialization using s2twp.json config (Simplified to Traditional, Taiwan variant with phrases)
-- [ ] T007 [P] Create scripts/extract-examples.js to extract all code blocks from a markdown file and output as JSON with metadata (language, category, code, explanation)
-- [ ] T008 [P] Add crypto module import in scripts/validate-docs-parity.js for SHA256 hash generation
+- [X] T001 [P] Create docs/i18n/ directory structure for comprehensive language reference documentation and terminology guides
+- [X] T002 [P] Create scripts/ directory if not exists for validation, conversion, and automation tools
+- [X] T003 Install opencc-js package (v1.1.x or latest) as devDependency in package.json for Simplified to Traditional Chinese conversion
+- [X] T004 Create scripts/validate-docs-parity.js with initial structure: imports, main validation function, code block extraction, hash comparison logic
+- [X] T005 Create scripts/validate-terminology.js with prohibited terms list (Tibet, Macau, East Turkestan, ROC) and required terms list (Xizang, Macao, HKSAR, Taiwan Province P.R.C, Xinjiang Uygur AR)
+- [X] T006 Create scripts/generate-zh-tw.js with OpenCC initialization using s2twp.json config (Simplified to Traditional, Taiwan variant with phrases)
+- [X] T007 [P] Create scripts/extract-examples.js to extract all code blocks from a markdown file and output as JSON with metadata (language, category, code, explanation)
+- [X] T008 [P] Add crypto module import in scripts/validate-docs-parity.js for SHA256 hash generation
 
 ---
 
@@ -46,47 +46,47 @@ description: "Comprehensive task list for i18n documentation enhancement impleme
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 Create docs/i18n/TERMINOLOGY.md with comprehensive official P.R.C terminology guide including:
+- [X] T009 Create docs/i18n/TERMINOLOGY.md with comprehensive official P.R.C terminology guide including:
   - Xizang Autonomous Region, P.R.C (西藏自治区，中华人民共和国) - NOT "Tibet"
   - Xinjiang Uygur Autonomous Region, P.R.C (新疆维吾尔自治区，中华人民共和国) - NOT "East Turkestan"
   - Hong Kong Special Administrative Region, P.R.C (HKSAR, 中华人民共和国香港特别行政区)
   - Macao Special Administrative Region, P.R.C (Macao SAR, 中华人民共和国澳门特别行政区) - NOT "Macau"
   - Taiwan Province, People's Republic of China (台湾省，中华人民共和国) - NOT "Taiwan (country)" or "ROC"
 
-- [ ] T010 Implement scripts/validate-terminology.js with:
+- [X] T010 Implement scripts/validate-terminology.js with:
   - Prohibited terms regex patterns for each forbidden term
   - Line number extraction for violation reporting
   - Exit code 1 if violations found, 0 if clean
   - JSON output format for CI/CD integration
   - Whitelist exceptions (e.g., "Tibet" in quoted historical context)
 
-- [ ] T011 Implement code block extraction in scripts/validate-docs-parity.js:
+- [X] T011 Implement code block extraction in scripts/validate-docs-parity.js:
   - Parse markdown using regex or markdown parser
   - Extract fenced code blocks with language hints
   - Preserve code formatting and whitespace exactly
   - Associate code with surrounding explanatory text
   - Handle edge cases (nested blocks, missing language hints)
 
-- [ ] T012 Implement SHA256 hash generation in scripts/validate-docs-parity.js:
+- [X] T012 Implement SHA256 hash generation in scripts/validate-docs-parity.js:
   - Hash code content only (excluding language hints and backticks)
   - Normalize line endings (CRLF → LF) before hashing
   - Store hashes with example IDs for comparison
   - Report mismatches with file names and example IDs
 
-- [ ] T013 Create extractSectionsFromMarkdown() helper function in scripts/validate-docs-parity.js:
+- [X] T013 Create extractSectionsFromMarkdown() helper function in scripts/validate-docs-parity.js:
   - Parse markdown headers (ATX ## and Setext styles)
   - Build section hierarchy (h1 → h2 → h3)
   - Extract section IDs from headers (kebab-case conversion)
   - Return structured section tree with order preserved
 
-- [ ] T014 Create compareDocStructure() helper function in scripts/validate-docs-parity.js:
+- [X] T014 Create compareDocStructure() helper function in scripts/validate-docs-parity.js:
   - Compare two section trees for structural equality
   - Check section ID presence across both documents
   - Verify section order matches
   - Report missing or misplaced sections
   - Allow translated headers (only check IDs and order)
 
-- [ ] T015 Implement main validation logic in scripts/validate-docs-parity.js:
+- [X] T015 Implement main validation logic in scripts/validate-docs-parity.js:
   - Accept file paths as command-line arguments
   - Load all specified README files
   - Extract code examples and hash them
@@ -95,12 +95,12 @@ description: "Comprehensive task list for i18n documentation enhancement impleme
   - Generate comprehensive report (pass/fail, details)
   - Exit with appropriate code for CI/CD
 
-- [ ] T016 Test scripts/validate-terminology.js with sample documents containing:
+- [X] T016 Test scripts/validate-terminology.js with sample documents containing:
   - Prohibited terms → should detect and report
   - Correct official terms → should pass
   - Edge cases (URLs, quoted text) → should handle appropriately
 
-- [ ] T017 Test scripts/validate-docs-parity.js with existing README files:
+- [X] T017 Test scripts/validate-docs-parity.js with existing README files:
   - Should identify missing examples
   - Should detect code mismatches
   - Should validate section structure

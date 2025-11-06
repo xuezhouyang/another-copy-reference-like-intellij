@@ -111,7 +111,12 @@
                 "copyReference.cache.evictionStrategy": {
                     "type": "string",
                     "default": "adaptive",
-                    "enum": ["lru", "lfu", "fifo", "adaptive"],
+                    "enum": [
+                        "lru",
+                        "lfu",
+                        "fifo",
+                        "adaptive"
+                    ],
                     "enumDescriptions": [
                         "%configuration.cache.evictionStrategy.lru.description%",
                         "%configuration.cache.evictionStrategy.lfu.description%",
@@ -199,23 +204,24 @@
         "prepackage": "npm run build:prod"
     },
     "devDependencies": {
-        "@types/vscode": "^1.74.0",
-        "@types/node": "^16.x.x",
-        "@types/mocha": "^10.0.0",
         "@types/glob": "^8.0.0",
+        "@types/mocha": "^10.0.0",
+        "@types/node": "^16.x.x",
+        "@types/vscode": "^1.74.0",
         "@typescript-eslint/eslint-plugin": "^5.x.x",
         "@typescript-eslint/parser": "^5.x.x",
-        "eslint": "^8.x.x",
-        "typescript": "^5.0.0",
-        "@vscode/vsce": "^2.24.0",
         "@vscode/test-electron": "^2.3.0",
+        "@vscode/vsce": "^2.24.0",
+        "eslint": "^8.x.x",
+        "glob": "^8.0.3",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
-        "glob": "^8.0.3",
-        "webpack": "^5.88.0",
-        "webpack-cli": "^5.1.0",
+        "opencc-js": "^1.0.5",
+        "terser-webpack-plugin": "^5.3.0",
         "ts-loader": "^9.4.0",
-        "terser-webpack-plugin": "^5.3.0"
+        "typescript": "^5.0.0",
+        "webpack": "^5.88.0",
+        "webpack-cli": "^5.1.0"
     },
     "l10n": "./package.nls.json",
     "l10n.bundles": {
