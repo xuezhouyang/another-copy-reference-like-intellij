@@ -1,0 +1,11 @@
+{
+  "spec": ["out/test/**/*.test.js"],
+  "timeout": 5000,
+  "recursive": true,
+  "reporter": "spec",
+  "ui": "tdd",
+  "color": true,
+  "exit": true,
+  "bail": false,
+  "require": ["out/test/setup.js"]
+}

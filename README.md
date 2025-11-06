@@ -4,87 +4,124 @@
 
 ## English
 
-A VS Code extension that copies reference paths similar to IntelliJ IDEA's Copy Reference feature.
+A VS Code extension that copies reference paths similar to IntelliJ IDEA's Copy Reference feature, now with support for multiple programming languages.
 
 ### Features
 
-- Copy full reference paths for classes and methods
-- Support for Java and Kotlin files
-- Format: `package.ClassName#methodName` or `package.ClassName`
-- Support for inner classes and interfaces
-- Multi-language support (12 languages)
+- **Universal Fallback**: Works with ANY file type using `filepath:line:column` format
+- **Multi-Language Support**: Java, Kotlin, JavaScript, TypeScript, Python, Markdown, HTML, XML, YAML, React, Flutter/Dart
+- **Intelligent Reference Format**: Language-specific reference formats for supported languages
+- **Framework Detection**: Automatic detection for React and Flutter projects
+- **Performance Optimized**: <100ms response time with built-in caching
+- **Internationalization**: UI available in 12 languages
 
-### Supported Languages
+### Supported Programming Languages
 
-- English
-- Chinese (Simplified)
-- Spanish
-- Hindi
-- Arabic
-- Portuguese
-- Russian
-- Japanese
-- French
-- German
-- Tibetan
-- Uyghur
+| Language | Reference Format | Example |
+|----------|-----------------|---------|
+| Java/Kotlin | `package.Class#method` | `com.example.MyService#doWork` |
+| JavaScript/TypeScript | `module/path.Class#method` | `services/auth.AuthService#login` |
+| Python | `module.path.Class.method` | `app.services.DataProcessor.process` |
+| Markdown | `file.md#heading` | `README.md#installation` |
+| HTML/XML | `file.html#element-id` | `index.html#header` |
+| YAML | `file.yml#key.path` | `config.yml#server.port` |
+| React | `Component.tsx#ComponentName` | `Button.tsx#PrimaryButton` |
+| Flutter/Dart | `package:app/file.dart#Class` | `package:myapp/widgets/button.dart#CustomButton` |
+| **Any other file** | `filepath:line:column` | `src/data.txt:10:5` |
+
+### UI Languages
+
+- English, Chinese (Simplified), Spanish, Hindi, Arabic, Portuguese
+- Russian, Japanese, French, German, Tibetan, Uyghur
 
 ### Usage
 
-1. Place cursor on class name or method name
+1. Place cursor anywhere in your code
 2. Copy reference using either:
    - Keyboard shortcut:
      - Windows/Linux: `Alt+Shift+C`
      - Mac: `Cmd+Shift+C`
    - Or right-click menu and select "Copy Reference"
 
-### Example
+### Examples
 
+#### Java/Kotlin
 ```java
-// In this code:
 package com.example.demo;
 
 public class MyService {
     public void doSomething() {
-        // ...
+        // Cursor here copies: com.example.demo.MyService#doSomething
     }
 }
+```
 
-// When cursor is on class name:
-com.example.demo.MyService
+#### JavaScript/TypeScript
+```typescript
+// File: src/services/UserService.ts
+export class UserService {
+    async getUser(id: string) {
+        // Cursor here copies: services/UserService#getUser
+    }
+}
+```
 
-// When cursor is on method name:
-com.example.demo.MyService#doSomething
+#### Python
+```python
+# File: app/models/user.py
+class UserModel:
+    def save(self):
+        # Cursor here copies: app.models.user.UserModel.save
+        pass
+```
+
+#### Universal Fallback (Any File)
+```text
+// File: data/config.txt at line 10, column 5
+Some configuration text
+// Cursor here copies: data/config.txt:10:5
 ```
 
 ### Requirements
 
-- VS Code version 1.60.0 or higher
-- File must have correct package declaration
+- VS Code version 1.74.0 or higher
+- Language-specific features require appropriate language extensions
+
+### Feedback
+
+Found a bug or have a feature request? Please send feedback to: **xuezhouyang@gmail.com**
 
 ### Known Issues
 
-- None
+- None at this time
 
 ### Release Notes
 
+#### 1.0.0 (Upcoming)
+
+- Added universal fallback support for ANY file type
+- Multi-language support for JavaScript, TypeScript, Python, Markdown, HTML, XML, YAML
+- Framework detection for React and Flutter
+- Performance improvements with intelligent caching
+- Enhanced error handling and user feedback
+
 #### 0.0.1
 
-- Initial release
+- Initial release with Java/Kotlin support
 - Basic reference copying functionality
-- Support for class and method names
 
 ## 中文
 
-一个类似于 IntelliJ IDEA 的 Copy Reference 功能的 VS Code 扩展。
+一个类似于 IntelliJ IDEA 的 Copy Reference 功能的 VS Code 扩展，现已支持多种编程语言。
 
 ### 功能
 
-- 复制类和方法的完整引用路径
-- 支持 Java 和 Kotlin 文件
-- 格式：`包名.类名#方法名` 或 `包名.类名`
-- 支持内部类和接口
-- 多语言支持（12种语言）
+- **通用后备模式**：支持任何文件类型，使用 `文件路径:行:列` 格式
+- **多编程语言支持**：Java、Kotlin、JavaScript、TypeScript、Python、Markdown、HTML、XML、YAML、React、Flutter/Dart
+- **智能引用格式**：为支持的语言提供特定的引用格式
+- **框架检测**：自动检测 React 和 Flutter 项目
+- **性能优化**：响应时间小于100毫秒，内置缓存机制
+- **国际化**：界面支持12种语言
 
 ### 支持的语言
 

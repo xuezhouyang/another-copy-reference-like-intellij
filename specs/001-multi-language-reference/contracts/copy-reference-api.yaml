@@ -1,0 +1,491 @@
+openapi: 3.0.3
+info:
+  title: Copy Reference Extension API
+  description: VS Code extension command and internal API contracts for multi-language Copy Reference functionality
+  version: 1.1.0
+  contact:
+    email: xuezhouyang@gmail.com
+
+# Note: This represents internal extension APIs, not REST endpoints
+# VS Code extensions use command-based APIs and internal interfaces
+
+paths:
+  /commands/copyReference:
+    post:
+      summary: Copy Reference Command
+      description: Main command to copy reference at current cursor position
+      operationId: copyReference
+      tags:
+        - Commands
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                textEditor:
+                  $ref: '#/components/schemas/TextEditor'
+      responses:
+        '200':
+          description: Reference copied successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopyReferenceResponse'
+        '400':
+          description: No active editor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No symbol found at cursor position
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Clipboard operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # Request/Response Schemas
+    TextEditor:
+      type: object
+      description: VS Code text editor context
+      required:
+        - document
+        - selection
+      properties:
+        document:
+          $ref: '#/components/schemas/TextDocument'
+        selection:
+          $ref: '#/components/schemas/Selection'
+
+    TextDocument:
+      type: object
+      description: Document being edited
+      required:
+        - uri
+        - languageId
+        - version
+        - lineCount
+      properties:
+        uri:
+          type: string
+          format: uri
+          example: "file:///home/user/project/src/components/Button.tsx"
+        languageId:
+          type: string
+          enum:
+            - java
+            - kotlin
+            - javascript
+            - javascriptreact
+            - typescript
+            - typescriptreact
+            - python
+            - markdown
+            - html
+            - xml
+            - yaml
+            - dart
+          example: "typescriptreact"
+        version:
+          type: integer
+          minimum: 1
+          example: 42
+        lineCount:
+          type: integer
+          minimum: 1
+          example: 150
+        fileName:
+          type: string
+          example: "Button.tsx"
+
+    Selection:
+      type: object
+      description: Current cursor position/selection
+      required:
+        - active
+      properties:
+        active:
+          $ref: '#/components/schemas/Position'
+        anchor:
+          $ref: '#/components/schemas/Position'
+
+    Position:
+      type: object
+      description: Line and character position
+      required:
+        - line
+        - character
+      properties:
+        line:
+          type: integer
+          minimum: 0
+          example: 42
+        character:
+          type: integer
+          minimum: 0
+          example: 15
+
+    CopyReferenceResponse:
+      type: object
+      required:
+        - success
+        - reference
+        - handler
+      properties:
+        success:
+          type: boolean
+          example: true
+        reference:
+          type: string
+          example: "src/components/Button.tsx#Button.handleClick"
+        handler:
+          type: string
+          description: Language handler that generated the reference
+          example: "javascriptreact"
+        frameworkDetected:
+          type: string
+          description: Framework detected if applicable
+          example: "react"
+        formatType:
+          type: string
+          enum:
+            - standard
+            - fallback
+          example: "standard"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          enum:
+            - NO_EDITOR
+            - NO_SYMBOL
+            - CLIPBOARD_ERROR
+            - PARSE_ERROR
+            - TIMEOUT
+          example: "NO_SYMBOL"
+        message:
+          type: string
+          description: Localized error message
+          example: "Unable to determine reference path"
+        details:
+          type: string
+          description: Additional error details for debugging
+          example: "No symbols found at line 42, column 15"
+
+    # Internal API Schemas
+    LanguageHandler:
+      type: object
+      description: Language-specific handler interface
+      required:
+        - languageId
+        - fileExtensions
+        - canHandle
+        - extractReference
+      properties:
+        languageId:
+          type: string
+          example: "python"
+        fileExtensions:
+          type: array
+          items:
+            type: string
+          example: [".py", ".pyw"]
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 50
+        supportsFrameworks:
+          type: boolean
+          default: false
+        canHandle:
+          type: string
+          description: Method signature
+          example: "(document: TextDocument) => boolean"
+        extractReference:
+          type: string
+          description: Method signature
+          example: "(document: TextDocument, position: Position) => Promise<ReferenceFormat | null>"
+
+    ReferenceFormat:
+      type: object
+      description: Structured reference format
+      required:
+        - formatType
+      properties:
+        formatType:
+          type: string
+          enum:
+            - standard
+            - fallback
+        filePath:
+          type: string
+          example: "src/utils/helpers.js"
+        modulePath:
+          type: string
+          example: "app.utils.helpers"
+        symbolPath:
+          type: array
+          items:
+            type: string
+          example: ["DateHelper", "formatDate"]
+        separator:
+          type: string
+          default: "#"
+          example: "#"
+        lineNumber:
+          type: integer
+          minimum: 1
+          description: Used for fallback format
+        columnNumber:
+          type: integer
+          minimum: 0
+          description: Used for fallback format
+
+    SymbolContext:
+      type: object
+      description: Symbol resolution context
+      required:
+        - document
+        - position
+        - languageId
+      properties:
+        document:
+          $ref: '#/components/schemas/TextDocument'
+        position:
+          $ref: '#/components/schemas/Position'
+        symbol:
+          $ref: '#/components/schemas/DocumentSymbol'
+        parentSymbols:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentSymbol'
+        languageId:
+          type: string
+        frameworkType:
+          type: string
+          enum:
+            - react
+            - flutter
+            - vue
+          nullable: true
+
+    DocumentSymbol:
+      type: object
+      description: VS Code document symbol
+      required:
+        - name
+        - kind
+        - range
+        - selectionRange
+      properties:
+        name:
+          type: string
+          example: "handleClick"
+        detail:
+          type: string
+          example: "(event: MouseEvent) => void"
+        kind:
+          type: integer
+          description: VS Code SymbolKind enum
+          enum:
+            - 0  # File
+            - 1  # Module
+            - 2  # Namespace
+            - 3  # Package
+            - 4  # Class
+            - 5  # Method
+            - 6  # Property
+            - 7  # Field
+            - 8  # Constructor
+            - 9  # Enum
+            - 10 # Interface
+            - 11 # Function
+            - 12 # Variable
+            - 13 # Constant
+            - 14 # String
+            - 15 # Number
+            - 16 # Boolean
+            - 17 # Array
+            - 18 # Object
+            - 19 # Key
+            - 20 # Null
+            - 21 # EnumMember
+            - 22 # Struct
+            - 23 # Event
+            - 24 # Operator
+            - 25 # TypeParameter
+        range:
+          $ref: '#/components/schemas/Range'
+        selectionRange:
+          $ref: '#/components/schemas/Range'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentSymbol'
+
+    Range:
+      type: object
+      description: Text range
+      required:
+        - start
+        - end
+      properties:
+        start:
+          $ref: '#/components/schemas/Position'
+        end:
+          $ref: '#/components/schemas/Position'
+
+    HandlerConfiguration:
+      type: object
+      description: Language handler configuration
+      properties:
+        enabled:
+          type: boolean
+          default: true
+        useBuiltInSymbols:
+          type: boolean
+          default: true
+        frameworkDetection:
+          type: boolean
+          default: true
+        customPatterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternConfig'
+        referenceTemplate:
+          type: string
+          example: "{file}#{class}.{method}"
+
+    PatternConfig:
+      type: object
+      description: Custom pattern configuration
+      required:
+        - pattern
+        - symbolKind
+      properties:
+        pattern:
+          type: string
+          description: Regular expression pattern
+          example: "/TODO:\\s*(.+)/g"
+        symbolKind:
+          type: integer
+          description: VS Code SymbolKind
+        name:
+          type: string
+          description: Pattern name for debugging
+
+    CacheEntry:
+      type: object
+      description: Symbol cache entry
+      required:
+        - documentUri
+        - documentVersion
+        - symbols
+        - timestamp
+      properties:
+        documentUri:
+          type: string
+          format: uri
+        documentVersion:
+          type: integer
+          minimum: 1
+        symbols:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentSymbol'
+        timestamp:
+          type: string
+          format: date-time
+        accessCount:
+          type: integer
+          minimum: 0
+
+    ClipboardEntry:
+      type: object
+      description: Clipboard operation result
+      required:
+        - content
+        - timestamp
+        - success
+      properties:
+        content:
+          type: string
+          maxLength: 32768
+          example: "src/components/Button.tsx#Button.handleClick"
+        timestamp:
+          type: string
+          format: date-time
+        source:
+          type: object
+          properties:
+            uri:
+              type: string
+              format: uri
+            languageId:
+              type: string
+        languageHandler:
+          type: string
+        success:
+          type: boolean
+
+    # Settings Schema
+    ExtensionSettings:
+      type: object
+      description: User-configurable settings
+      properties:
+        copyReference:
+          type: object
+          properties:
+            enableNotifications:
+              type: boolean
+              default: true
+              description: Show success/error notifications
+            fallbackEnabled:
+              type: boolean
+              default: true
+              description: Enable universal fallback for unsupported files
+            languageHandlers:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/HandlerConfiguration'
+            performanceMode:
+              type: string
+              enum:
+                - aggressive  # Maximum caching
+                - balanced    # Default
+                - conservative # Minimal caching
+              default: balanced
+            maxCacheSize:
+              type: integer
+              minimum: 10
+              maximum: 1000
+              default: 100
+              description: Maximum cached documents
+
+tags:
+  - name: Commands
+    description: VS Code command palette commands
+  - name: Handlers
+    description: Language-specific handlers
+  - name: Internal
+    description: Internal extension APIs

@@ -1,4 +1,6 @@
 out
+dist
+build
 node_modules
 .vscode-test/
 *.vsix
@@ -8,4 +10,12 @@ node_modules
 npm-debug.log
 yarn-error.log
 yarn.lock
-package-lock.json 
+package-lock.json
+*.log
+.env*
+coverage/
+.nyc_output/
+*.tmp
+*.swp
+.vscode/
+test-results/ 
