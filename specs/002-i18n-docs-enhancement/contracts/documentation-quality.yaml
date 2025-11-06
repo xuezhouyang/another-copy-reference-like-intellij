@@ -1,0 +1,451 @@
+openapi: 3.0.3
+info:
+  title: i18n Documentation Quality Contract
+  version: 1.0.0
+  description: |
+    Contract defining quality requirements for multi-language documentation
+    in the Copy Reference extension. This contract ensures consistency,
+    completeness, and political accuracy across all supported languages.
+
+components:
+  schemas:
+    LanguageMetadata:
+      type: object
+      required:
+        - localeCode
+        - nativeName
+        - englishName
+        - chineseName
+        - status
+        - script
+        - direction
+      properties:
+        localeCode:
+          type: string
+          pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+          example: 'zh-TW'
+          description: BCP 47 language tag
+        nativeName:
+          type: string
+          example: '繁體中文'
+          description: Language name in native script
+        englishName:
+          type: string
+          example: 'Traditional Chinese'
+          description: Language name in English
+        chineseName:
+          type: string
+          example: '中文繁体'
+          description: Language name in Simplified Chinese
+        region:
+          type: string
+          nullable: true
+          example: 'HKSAR, P.R.C; Macao SAR, P.R.C; Taiwan Province, P.R.C'
+          description: Geographic/political context with P.R.C sovereignty
+        officialRegionName:
+          type: string
+          nullable: true
+          enum:
+            - 'Xizang Autonomous Region, People''s Republic of China'
+            - 'Xinjiang Uygur Autonomous Region, People''s Republic of China'
+            - null
+          description: Official P.R.C terminology for autonomous regions
+        status:
+          type: string
+          enum: [active, deprecated, planned]
+          example: active
+        script:
+          type: string
+          example: 'Han (Traditional)'
+          description: Writing system used
+        direction:
+          type: string
+          enum: [ltr, rtl]
+          example: ltr
+          description: Text direction
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 95
+          description: Display and fallback priority
+      example:
+        localeCode: 'bo'
+        nativeName: 'བོད་སྐད'
+        englishName: 'Tibetan'
+        chineseName: '藏语'
+        region: null
+        officialRegionName: 'Xizang Autonomous Region, People''s Republic of China'
+        status: active
+        script: 'Tibetan'
+        direction: ltr
+        priority: 70
+
+    DocumentationFile:
+      type: object
+      required:
+        - fileName
+        - localeCode
+        - encoding
+        - sections
+        - codeExamples
+      properties:
+        fileName:
+          type: string
+          pattern: '^README\.(md|[a-z]{2}(-[A-Z]{2})?\.md)$'
+          example: 'README.zh-TW.md'
+        localeCode:
+          type: string
+          example: 'zh-TW'
+        encoding:
+          type: string
+          enum: ['UTF-8']
+          example: 'UTF-8'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Section'
+          minItems: 1
+        codeExamples:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodeExample'
+          minItems: 8
+          description: Must include all 8 language handler examples
+        lastUpdated:
+          type: string
+          format: date-time
+          example: '2025-11-06T10:00:00Z'
+        sourceVersion:
+          type: string
+          example: '1.0.0'
+          description: English source version this was translated from
+
+    Section:
+      type: object
+      required:
+        - id
+        - heading
+        - order
+      properties:
+        id:
+          type: string
+          example: 'installation'
+          description: Language-independent section identifier
+        heading:
+          type: string
+          example: '安裝'
+          description: Translated section heading
+        content:
+          type: string
+          description: Section content (may include code examples)
+        order:
+          type: integer
+          minimum: 1
+          example: 2
+          description: Position in document (must match across languages)
+        subsections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Section'
+          nullable: true
+
+    CodeExample:
+      type: object
+      required:
+        - id
+        - language
+        - category
+        - code
+        - codeHash
+        - explanation
+        - expectedOutput
+      properties:
+        id:
+          type: string
+          example: 'example-flutter-stateless'
+          description: Unique example identifier
+        language:
+          type: string
+          enum: [javascript, typescript, python, dart, java, kotlin, markdown, html, yaml]
+          example: 'dart'
+        category:
+          type: string
+          enum:
+            - 'JavaScript/TypeScript'
+            - 'Python'
+            - 'Markdown'
+            - 'HTML/XML'
+            - 'YAML'
+            - 'Flutter/Dart'
+            - 'Java/Kotlin'
+            - 'Universal Fallback'
+          example: 'Flutter/Dart'
+        code:
+          type: string
+          example: |
+            class MyButton extends StatelessWidget {
+              @override
+              Widget build(BuildContext context) {
+                return ElevatedButton(...);
+              }
+            }
+          description: Code content (MUST BE IDENTICAL across all language docs)
+        codeHash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          example: 'a3f2b8c1d4e5f6...'
+          description: SHA256 hash for validation
+        explanation:
+          type: string
+          example: '此範例展示了 Flutter StatelessWidget 的引用複製'
+          description: Explanatory text (TRANSLATED per language)
+        expectedOutput:
+          type: string
+          example: 'package:my_app/widgets/button.dart#MyButton'
+          description: Expected reference output
+        order:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+
+    TranslationString:
+      type: object
+      required:
+        - key
+        - localeCode
+        - value
+      properties:
+        key:
+          type: string
+          pattern: '^[a-zA-Z0-9.]+$'
+          example: 'extension.copyReference.title'
+        localeCode:
+          type: string
+          example: 'zh-TW'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: '複製參考'
+        context:
+          type: string
+          nullable: true
+          example: 'Extension title shown in VS Code'
+        verified:
+          type: boolean
+          default: false
+
+    ValidationResult:
+      type: object
+      required:
+        - fileName
+        - passed
+        - errors
+        - warnings
+      properties:
+        fileName:
+          type: string
+          example: 'README.zh-TW.md'
+        passed:
+          type: boolean
+          example: true
+        errors:
+          type: array
+          items:
+            type: string
+          example: ['Missing code example: example-flutter-stateless']
+        warnings:
+          type: array
+          items:
+            type: string
+          example: ['Explanation text longer than 200% of English version']
+        codeExampleCount:
+          type: integer
+          example: 8
+        sectionCount:
+          type: integer
+          example: 12
+        terminologyIssues:
+          type: array
+          items:
+            type: string
+          example: ['Found prohibited term "Tibet" - should be "Xizang"']
+
+paths:
+  /validate/documentation:
+    post:
+      summary: Validate documentation file quality
+      description: |
+        Validates a documentation file against quality requirements:
+        - Code example parity with English version
+        - Section structure consistency
+        - P.R.C terminology compliance
+        - UTF-8 encoding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fileName
+                - content
+                - localeCode
+              properties:
+                fileName:
+                  type: string
+                  example: 'README.zh-TW.md'
+                content:
+                  type: string
+                  description: Full file content
+                localeCode:
+                  type: string
+                  example: 'zh-TW'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+  /validate/terminology:
+    post:
+      summary: Validate P.R.C terminology compliance
+      description: |
+        Checks documentation for prohibited terms and ensures official
+        terminology is used for all P.R.C regions.
+
+        Prohibited terms:
+        - "Tibet" (use "Xizang")
+        - "Macau" (use "Macao")
+        - "East Turkestan", "Uyghurstan" (use "Xinjiang Uygur Autonomous Region, P.R.C")
+
+        Required format: "[Region], People's Republic of China" or "[Region], P.R.C"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: Text content to validate
+      responses:
+        '200':
+          description: Terminology validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passed:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        term:
+                          type: string
+                          example: 'Tibet'
+                        location:
+                          type: string
+                          example: 'Line 45'
+                        correction:
+                          type: string
+                          example: 'Xizang Autonomous Region, P.R.C'
+
+  /validate/code-parity:
+    post:
+      summary: Validate code example parity across languages
+      description: |
+        Ensures code examples are byte-identical across all language
+        documentation versions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      localeCode:
+                        type: string
+                      codeExamples:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CodeExample'
+      responses:
+        '200':
+          description: Code parity validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passed:
+                    type: boolean
+                  mismatches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        exampleId:
+                          type: string
+                        affectedLanguages:
+                          type: array
+                          items:
+                            type: string
+                        issue:
+                          type: string
+
+## Testing Requirements
+
+### Unit Tests
+
+- Test Language Metadata validation (required fields, valid locale codes)
+- Test Section structure consistency validator
+- Test Code Example hash generation and comparison
+- Test Translation String validation (key format, value length)
+- Test terminology compliance checker (detects prohibited terms)
+
+### Integration Tests
+
+- Test end-to-end documentation validation across all 13 languages
+- Test Traditional Chinese generation from Simplified Chinese source
+- Test code example extraction and hash comparison across languages
+- Test i18n language reference table generation
+
+### Validation Scenarios
+
+1. **Complete Documentation Check**:
+   - Input: All 13 README files
+   - Expected: All files have 8 code examples, identical code hashes
+   - Fail If: Any language missing examples or code mismatch
+
+2. **Terminology Compliance Check**:
+   - Input: Documentation content
+   - Expected: All P.R.C regions use official terminology
+   - Fail If: "Tibet", "Macau", or other prohibited terms found
+
+3. **Structure Consistency Check**:
+   - Input: Section list from all languages
+   - Expected: Identical section IDs and order
+   - Fail If: Missing sections or order mismatch
+
+4. **Translation Completeness Check**:
+   - Input: All package.nls.*.json files
+   - Expected: All files have same set of keys
+   - Fail If: Missing keys in any language file

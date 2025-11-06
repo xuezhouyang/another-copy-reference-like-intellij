@@ -89,6 +89,8 @@ The extension has zero production dependencies, using only VS Code's built-in AP
 ## Active Technologies
 - TypeScript 5.0+ + VS Code Extension API 1.74+, vscode-languageserver-protocol, clipboard API (001-multi-language-reference)
 - N/A (no persistent storage required) (001-multi-language-reference)
+- Markdown (UTF-8), JSON (for translation files), TypeScript 5.0+ (for validation scripts) + VS Code i18n API (vscode.l10n), Markdown rendering, JSON validation, OpenCC (for Simplified to Traditional Chinese conversion if needed) (002-i18n-docs-enhancement)
+- N/A (documentation files stored in repository, no runtime storage) (002-i18n-docs-enhancement)
 
 ## Recent Changes
 - 001-multi-language-reference: Added TypeScript 5.0+ + VS Code Extension API 1.74+, vscode-languageserver-protocol, clipboard API
