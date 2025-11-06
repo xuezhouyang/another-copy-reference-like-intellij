@@ -329,6 +329,37 @@ Before considering the feature complete:
 - [ ] Documentation structure consistent across all languages
 - [ ] All validation scripts pass without errors
 
+### Scenario 5: Removing Email from Documentation
+
+**Goal**: Remove personal email address from public documentation to prevent spam
+
+**Steps**:
+
+1. **Remove from all README files**:
+   ```bash
+   # Search for email references
+   grep -r "xuezhouyang@gmail.com" README*.md
+
+   # Remove email from feedback sections
+   # Replace with: "Report issues: https://github.com/xuezhouyang/another-copy-reference-like-intellij/issues"
+   ```
+
+2. **Update package.json description** (if email present):
+   - Remove email from `description` field
+   - Keep in `author` field only (standard practice)
+
+3. **Update feedback command**:
+   - Change extension feedback to open GitHub Issues URL
+   - Remove email option from feedback UI
+
+4. **Update all 13 language versions**:
+   - Replace email references with GitHub Issues link
+   - Translate "Report Issues" appropriately for each language
+
+**Expected Result**: Zero email references in public documentation, GitHub Issues as sole feedback channel
+
+---
+
 ## Expected Deliverables
 
 1. **New Files**:
@@ -341,9 +372,10 @@ Before considering the feature complete:
    - `scripts/generate-zh-tw.js`
 
 2. **Updated Files**:
-   - `README.md` (English) - ensure all 8 examples present
-   - `README.zh-CN.md` through `README.ug.md` (12 files) - add missing examples
-   - `package.json` - add zh-tw to l10n.bundles
+   - `README.md` (English) - ensure all 8 examples present, remove email
+   - `README.zh-CN.md` through `README.ug.md` (12 files) - add missing examples, remove email
+   - `package.json` - add zh-tw to l10n.bundles, remove email from description
+   - `src/utils/feedback.ts` - update to use GitHub Issues only (no email option)
 
 3. **Validation Reports**:
    - Documentation parity report (all languages ✓)

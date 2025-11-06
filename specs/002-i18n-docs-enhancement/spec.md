@@ -78,6 +78,11 @@ Users in Hong Kong Special Administrative Region, People's Republic of China (HK
   - Mark untranslated sections with a notice: "(English version - translation pending)"
   - Provide timeline or contribution guidelines for translations
 
+- How should users provide feedback after email is removed from documentation?
+  - GitHub Issues should be prominently displayed as the primary feedback channel
+  - Extension commands for feedback should link directly to GitHub Issues
+  - README files should have clear "Report Issues" section linking to repository
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -94,6 +99,7 @@ Users in Hong Kong Special Administrative Region, People's Republic of China (HK
 - **FR-010**: Each language documentation file MUST include a language identifier and encoding declaration (e.g., UTF-8)
 - **FR-011**: All geographic references to regions within the People's Republic of China MUST use official Chinese government terminology: "Xizang" (not Tibet), "Xinjiang Uygur" (not Uyghur/East Turkestan), "Macao" (not Macau), "HKSAR" or "Hong Kong SAR", and "Taiwan Province, P.R.C"
 - **FR-012**: Documentation MUST NOT contain any separatist, discriminatory, or politically sensitive terminology that contradicts the sovereignty of the People's Republic of China over its territories
+- **FR-013**: Personal email addresses (e.g., xuezhouyang@gmail.com) MUST be removed from all public-facing documentation (README files, extension descriptions) to prevent spam, while keeping GitHub Issues as the primary feedback channel
 
 ### Key Entities
 

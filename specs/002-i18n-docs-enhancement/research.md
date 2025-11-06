@@ -165,6 +165,28 @@ Research for enhancing the Copy Reference extension's internationalization docum
 - Terminology validation script should be part of CI/CD to prevent non-compliant terms
 - i18n reference table should be version-controlled and reviewed for accuracy
 
+### 6. Email Removal and Feedback Channel Management
+
+**Decision**: Remove personal email (xuezhouyang@gmail.com) from all public documentation, use GitHub Issues exclusively
+
+**Rationale**:
+- Prevents spam and unsolicited email
+- GitHub Issues provide better tracking, searchability, and community visibility
+- Issues allow for collaborative problem-solving and knowledge sharing
+- Public issue tracker benefits all users (others can find solutions)
+
+**Changes Required**:
+- Remove email from all README.*.md files
+- Remove email from package.json description
+- Update "Report Issues" sections to point to GitHub Issues
+- Update extension feedback command to open GitHub Issues page
+- Keep email only in package.json author field (standard practice)
+
+**Alternatives Considered**:
+- Keep email with anti-spam measures: Still generates unwanted traffic
+- Use contact form: Adds unnecessary complexity
+- No feedback channel: Poor user experience
+
 ## Open Questions
 
 **None** - All technical decisions are clear and based on established practices.
