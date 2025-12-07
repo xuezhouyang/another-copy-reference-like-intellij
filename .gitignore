@@ -1,16 +1,13 @@
 out
-dist
 build
 node_modules
 .vscode-test/
-*.vsix
 .DS_Store
 .idea/
 *.iml
 npm-debug.log
 yarn-error.log
 yarn.lock
-package-lock.json
 *.log
 .env*
 coverage/
