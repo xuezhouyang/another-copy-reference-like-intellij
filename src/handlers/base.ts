@@ -181,8 +181,10 @@ export abstract class BaseLanguageHandler implements ILanguageHandler {
                     }
                 }
 
-                // Return this symbol if no child matches
-                if (symbol.selectionRange.contains(position)) {
+                // Return this symbol if no child matches. Use the full symbol range so
+                // references resolve when the cursor is inside a symbol body (e.g. a
+                // method implementation) rather than just on the identifier.
+                if (symbol.range.contains(position)) {
                     return { symbol, parents };
                 }
             }
