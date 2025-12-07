@@ -8,10 +8,12 @@ A VS Code extension that copies reference paths similar to IntelliJ IDEA's Copy 
 
 ### Features
 
+- **Multi-Format Reference System** ⭐ NEW: Choose from 6 different reference formats
 - **Universal Fallback**: Works with ANY file type using `filepath:line:column` format
 - **Multi-Language Support**: Java, Kotlin, JavaScript, TypeScript, Python, Markdown, HTML, XML, YAML, React, Flutter/Dart
 - **Intelligent Reference Format**: Language-specific reference formats for supported languages
 - **Framework Detection**: Automatic detection for React and Flutter projects
+- **Custom Format Templates**: Define your own reference formats with variable placeholders
 - **Performance Optimized**: <100ms response time with built-in caching
 - **Internationalization**: UI available in 12 languages
 
@@ -29,6 +31,45 @@ A VS Code extension that copies reference paths similar to IntelliJ IDEA's Copy 
 | Flutter/Dart | `package:app/file.dart#Class` | `package:myapp/widgets/button.dart#CustomButton` |
 | **Any other file** | `filepath:line:column` | `src/data.txt:10:5` |
 
+### Reference Formats
+
+Choose from 6 built-in reference formats to suit your workflow:
+
+| Format | Description | Example Output | Use Case |
+|--------|-------------|----------------|----------|
+| **Qualified** | Fully qualified reference with package/module | `com.example.UserService#login` | Default format, universal use |
+| **With Line Number** | Qualified reference + line number | `com.example.UserService#login:42` | Precise code location |
+| **File Path** | Relative file path + line number | `src/main/UserService.java:42` | Code review, navigation |
+| **Markdown Link** | Clickable markdown hyperlink | `[UserService#login](src/main/UserService.java#L42)` | Documentation, README files |
+| **Javadoc Style** | Javadoc `@link` tag format | `{@link UserService#login()}` | Java/Kotlin documentation |
+| **Stack Trace** | Java stack trace format | `at UserService.login(UserService.java:42)` | Error reporting, debugging |
+| **Custom** | User-defined template | `${package}.${class}::${method}` | Team-specific conventions |
+
+#### Custom Format Variables
+
+Create your own formats using these placeholders:
+- `${package}` - Package or module name
+- `${class}` - Class or type name
+- `${method}` - Method or function name
+- `${field}` - Field or property name
+- `${file}` - Relative file path
+- `${fileName}` - File name only
+- `${line}` - Line number
+- `${column}` - Column number
+- `${separator}` - Symbol separator (default: `#`)
+- `${languageId}` - Language identifier
+- `${workspace}` - Workspace name
+
+**Example custom format:**
+```json
+{
+  "copyReference.customFormats": {
+    "jira": "[[${file}#L${line}|${class}#${method}]]",
+    "slack": "<${file}#L${line}|${class}.${method}>"
+  }
+}
+```
+
 ### UI Languages
 
 - English, Chinese (Simplified), Spanish, Hindi, Arabic, Portuguese
@@ -36,12 +77,23 @@ A VS Code extension that copies reference paths similar to IntelliJ IDEA's Copy 
 
 ### Usage
 
+#### Quick Copy (Default Format)
 1. Place cursor anywhere in your code
-2. Copy reference using either:
+2. Copy reference using:
    - Keyboard shortcut:
      - Windows/Linux: `Alt+Shift+C`
      - Mac: `Cmd+Shift+C`
    - Or right-click menu and select "Copy Reference"
+
+#### Copy with Format Selection
+1. Place cursor anywhere in your code
+2. Open format picker using:
+   - Keyboard shortcut:
+     - Windows/Linux: `Alt+Shift+F`
+     - Mac: `Cmd+Shift+F`
+   - Or right-click menu and select "Copy Reference: Choose Format"
+3. Select your desired format from the picker
+4. Reference is copied to clipboard in the selected format
 
 ### Examples
 
@@ -82,6 +134,26 @@ Some configuration text
 // Cursor here copies: data/config.txt:10:5
 ```
 
+#### Format Examples (Same Code, Different Formats)
+```java
+// File: src/main/java/com/example/UserService.java
+package com.example;
+
+public class UserService {
+    public void authenticate() {  // Cursor on line 4
+        // ...
+    }
+}
+```
+
+**Different format outputs for the same cursor position:**
+- **Qualified**: `com.example.UserService#authenticate`
+- **With Line**: `com.example.UserService#authenticate:4`
+- **File Path**: `src/main/java/com/example/UserService.java:4`
+- **Markdown**: `[UserService#authenticate](src/main/java/com/example/UserService.java#L4)`
+- **Javadoc**: `{@link UserService#authenticate()}`
+- **Stack Trace**: `at UserService.authenticate(UserService.java:4)`
+
 ### Requirements
 
 - VS Code version 1.74.0 or higher
@@ -97,7 +169,21 @@ Found a bug or have a feature request? Please send feedback to: **xuezhouyang@gm
 
 ### Release Notes
 
-#### 1.0.0 (Upcoming)
+#### 1.2.0 (Latest)
+
+- **Multi-Format System**: 6 built-in reference formats to choose from
+- **Format Picker**: Interactive UI for selecting output format (Alt+Shift+F)
+- **Custom Templates**: Define your own formats with variable placeholders
+- **Language-Specific Formats**: Javadoc and Stack Trace formats for Java/Kotlin
+- **Configuration**: Extensive settings for default formats, language preferences
+- **100% Backward Compatible**: Original Alt+Shift+C command unchanged
+
+#### 1.0.1
+
+- Fixed Java/Kotlin handler bug
+- Proper package.Class#method format for Java/Kotlin files
+
+#### 1.0.0
 
 - Added universal fallback support for ANY file type
 - Multi-language support for JavaScript, TypeScript, Python, Markdown, HTML, XML, YAML

@@ -2,7 +2,7 @@
     "name": "another-copy-reference-like-intellij",
     "displayName": "%extension.copyReference.title%",
     "description": "%extension.copyReference.description%",
-    "version": "1.0.1",
+    "version": "1.2.0",
     "publisher": "xuezhouyang",
     "repository": {
         "type": "git",
