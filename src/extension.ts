@@ -14,6 +14,8 @@ import { HtmlHandler } from './handlers/html';
 import { YamlHandler } from './handlers/yaml';
 import { FlutterHandler } from './handlers/flutter';
 import { JavaHandler } from './handlers/java';
+import { FormatManager } from './formatters/manager';
+import { FormatVariables } from './types/formats';
 
 /**
  * Handler registry for managing language-specific handlers
@@ -129,6 +131,11 @@ export function activate(context: vscode.ExtensionContext) {
         await handleCopyReference();
     });
 
+    // Register copy reference with format picker command
+    const copyReferenceWithFormatCommand = vscode.commands.registerCommand('extension.copyReferenceWithFormat', async () => {
+        await handleCopyReferenceWithFormat();
+    });
+
     // Register configuration change listener
     const configChangeListener = vscode.workspace.onDidChangeConfiguration(e => {
         if (e.affectsConfiguration('copyReference')) {
@@ -160,6 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Add all disposables to subscriptions
     context.subscriptions.push(
         copyReferenceCommand,
+        copyReferenceWithFormatCommand,
         configChangeListener,
         documentChangeListener,
         documentCloseListener
@@ -268,6 +276,112 @@ async function handleCopyReference(): Promise<void> {
             LocalizationManager.getMessage('extension.copyReference.failed')
         );
         telemetry.trackError(error as Error, 'copyReference');
+    }
+}
+
+/**
+ * Handle copy reference with format picker
+ */
+async function handleCopyReferenceWithFormat(): Promise<void> {
+    const telemetry = TelemetryReporter.getInstance();
+    const startTime = Date.now();
+    const editor = vscode.window.activeTextEditor;
+
+    // Check if editor is available
+    if (!editor) {
+        vscode.window.showInformationMessage(
+            LocalizationManager.getMessage('extension.copyReference.noEditor')
+        );
+        telemetry.trackEvent(TelemetryEvents.COPY_REFERENCE, { result: 'no_editor' });
+        return;
+    }
+
+    const document = editor.document;
+    const position = editor.selection.active;
+
+    // Get the appropriate handler
+    const handler = handlerRegistry.getHandler(document);
+
+    if (!handler) {
+        vscode.window.showErrorMessage(
+            LocalizationManager.getMessage('extension.copyReference.noHandler')
+        );
+        telemetry.trackEvent(TelemetryEvents.COPY_REFERENCE, {
+            result: 'no_handler',
+            languageId: document.languageId
+        });
+        return;
+    }
+
+    try {
+        // Extract reference using the handler
+        const reference = await handler.extractReference(document, position);
+
+        if (!reference) {
+            vscode.window.showInformationMessage(
+                LocalizationManager.getMessage('extension.copyReference.failed')
+            );
+            telemetry.trackLanguageUsage(document.languageId, handler.languageId, false);
+            return;
+        }
+
+        // Show format picker
+        const formatManager = FormatManager.getInstance();
+        const selection = await formatManager.showFormatPicker(document.languageId);
+
+        if (!selection) {
+            // User cancelled
+            return;
+        }
+
+        // Build format variables from reference
+        const formatVars: FormatVariables = {
+            package: reference.modulePath,
+            class: reference.symbolPath?.[reference.symbolPath.length - 2],
+            method: reference.symbolPath?.[reference.symbolPath.length - 1],
+            file: reference.filePath,
+            fileName: reference.filePath.split('/').pop(),
+            line: reference.lineNumber,
+            column: reference.columnNumber,
+            fullReference: reference.toString(),
+            symbolPath: reference.symbolPath,
+            separator: reference.separator,
+            languageId: document.languageId,
+            workspace: vscode.workspace.name
+        };
+
+        // Format using selected format
+        const formattedReference = formatManager.format(formatVars, selection.format);
+
+        // Copy to clipboard
+        const success = await ClipboardManager.writeText(formattedReference);
+
+        if (success) {
+            // Remember format if requested
+            if (selection.remember) {
+                formatManager.setLastUsedFormat(selection.format);
+            }
+
+            // Show success message
+            const message = LocalizationManager.getMessage('extension.copyReference.copied');
+            vscode.window.showInformationMessage(`${message}: ${formattedReference}`);
+
+            // Track successful operation
+            const duration = Date.now() - startTime;
+            telemetry.trackLanguageUsage(document.languageId, handler.languageId, true);
+            telemetry.trackPerformance('copyReferenceWithFormat', duration);
+            telemetry.trackEvent(TelemetryEvents.FEATURE_USAGE, {
+                feature: 'multi_format',
+                format: selection.format
+            });
+        }
+
+    } catch (error) {
+        console.error('Error generating formatted reference:', error);
+        vscode.window.showErrorMessage(
+            LocalizationManager.getMessage('extension.copyReference.failed')
+        );
+        telemetry.trackError(error as Error, 'copyReferenceWithFormat');
     }
 }
 

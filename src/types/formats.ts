@@ -1,6 +1,3 @@
-import * as vscode from 'vscode';
-import { ReferenceFormat } from './index';
-
 /**
  * Reference format types
  */
