@@ -2,7 +2,7 @@
     "name": "another-copy-reference-like-intellij",
     "displayName": "%extension.copyReference.title%",
     "description": "%extension.copyReference.description%",
-    "version": "1.0.1",
+    "version": "1.2.0",
     "publisher": "xuezhouyang",
     "repository": {
         "type": "git",
@@ -51,6 +51,10 @@
                 "title": "%extension.copyReference.title%"
             },
             {
+                "command": "extension.copyReferenceWithFormat",
+                "title": "Copy Reference: Choose Format"
+            },
+            {
                 "command": "extension.copyReference.feedback",
                 "title": "Copy Reference: Provide Feedback"
             }
@@ -60,6 +64,10 @@
                 {
                     "command": "extension.copyReference",
                     "group": "navigation"
+                },
+                {
+                    "command": "extension.copyReferenceWithFormat",
+                    "group": "navigation"
                 }
             ]
         },
@@ -68,6 +76,12 @@
                 "command": "extension.copyReference",
                 "key": "alt+shift+c",
                 "mac": "cmd+shift+c",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.copyReferenceWithFormat",
+                "key": "alt+shift+f",
+                "mac": "cmd+shift+f",
                 "when": "editorTextFocus"
             }
         ],
@@ -178,6 +192,51 @@
                             }
                         }
                     }
+                },
+                "copyReference.defaultFormat": {
+                    "type": "string",
+                    "default": "qualified",
+                    "enum": ["qualified", "withLine", "filePath", "markdown", "javadoc", "stackTrace"],
+                    "enumDescriptions": [
+                        "Qualified reference: com.example.Class#method",
+                        "With line number: com.example.Class#method:42",
+                        "File path: src/main/Class.java:42",
+                        "Markdown link: [Class#method](src/main/Class.java#L42)",
+                        "Javadoc style: {@link Class#method()}",
+                        "Stack trace style: at Class.method(Class.java:42)"
+                    ],
+                    "description": "Default reference format to use"
+                },
+                "copyReference.showFormatPicker": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show format picker every time when copying reference"
+                },
+                "copyReference.rememberLastFormat": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Remember the last used format for each language"
+                },
+                "copyReference.languageFormats": {
+                    "type": "object",
+                    "default": {},
+                    "description": "Language-specific default formats (e.g., {\"java\": \"qualified\", \"python\": \"dotted\"})",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "copyReference.customFormats": {
+                    "type": "object",
+                    "default": {},
+                    "description": "Custom format templates using placeholders like ${package}, ${class}, ${method}, ${file}, ${line}",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "copyReference.includeFilePath": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Include file path in the reference by default"
                 }
             }
         }
