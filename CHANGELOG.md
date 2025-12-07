@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-12-07
+
+### Fixed
+- **Java/Kotlin Copy Reference**: Fixed critical bug where Java and Kotlin files were using the fallback handler, returning only `filepath:line:column` instead of the proper `package.ClassName#methodName` format
+- Added missing JavaHandler that was claimed to be included in v1.0.0 but was never implemented
+- Java and Kotlin files now properly extract package names and generate fully qualified references
+
+### Technical Details
+- Created `src/handlers/java.ts` with support for `.java`, `.kt`, `.kts` files
+- Implements package extraction via regex: `package\s+([\w.]+)`
+- Supports nested classes and proper method/class separation using `#` symbol
+- Handler registered with priority 80 to ensure it takes precedence over fallback
+
 ## [1.0.0] - 2025-11-06
 
 ### Added
