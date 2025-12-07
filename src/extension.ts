@@ -13,6 +13,7 @@ import { MarkdownHandler } from './handlers/markdown';
 import { HtmlHandler } from './handlers/html';
 import { YamlHandler } from './handlers/yaml';
 import { FlutterHandler } from './handlers/flutter';
+import { JavaHandler } from './handlers/java';
 
 /**
  * Handler registry for managing language-specific handlers
@@ -176,6 +177,7 @@ function registerHandlers(): void {
     handlerRegistry.clear();
 
     // Register language-specific handlers
+    handlerRegistry.register(new JavaHandler());
     handlerRegistry.register(new JavaScriptHandler());
     handlerRegistry.register(new PythonHandler());
     handlerRegistry.register(new MarkdownHandler());
@@ -186,7 +188,7 @@ function registerHandlers(): void {
     // Register universal handler as fallback for any unsupported file type
     handlerRegistry.setFallback(new UniversalHandler());
 
-    console.log('Registered JavaScriptHandler, PythonHandler, MarkdownHandler, HtmlHandler, YamlHandler, FlutterHandler, and UniversalHandler as fallback');
+    console.log('Registered JavaHandler, JavaScriptHandler, PythonHandler, MarkdownHandler, HtmlHandler, YamlHandler, FlutterHandler, and UniversalHandler as fallback');
 }
 
 /**

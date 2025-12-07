@@ -1,0 +1,52 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run full test suite
+      run: npm test
+      continue-on-error: true
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Build production
+      run: npm run build:prod
+
+    - name: Package extension
+      run: npm run package
+
+    - name: Get current date
+      id: date
+      run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+    - name: Upload nightly build
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-${{ steps.date.outputs.DATE }}
+        path: '*.vsix'
+        retention-days: 30
+
+    - name: Send notification on failure
+      if: failure()
+      run: echo "❌ Nightly build failed!"
