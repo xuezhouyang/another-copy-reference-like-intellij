@@ -93,10 +93,10 @@ export class CacheManager {
     private static instance: CacheManager;
     private cache = new Map<string, EnhancedCacheEntry>();
     private statistics: CacheStatistics;
-    private maxCacheSize: number = 50;
+    private maxCacheSize = 50;
     private maxMemorySize: number = 10 * 1024 * 1024; // 10MB in bytes
     private currentMemoryUsage = 0;
-    private cacheTimeout: number = 300000; // 5 minutes
+    private cacheTimeout = 300000; // 5 minutes
     private evictionStrategy: EvictionStrategy = EvictionStrategy.ADAPTIVE;
     private cleanupInterval?: NodeJS.Timeout;
     private telemetry: TelemetryReporter;

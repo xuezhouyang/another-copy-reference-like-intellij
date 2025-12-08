@@ -373,7 +373,7 @@ export function registerFeedbackCommand(context: vscode.ExtensionContext): void 
 
     // Optional: Show rating reminder after certain usage
     const showReminderAfterUses = 50;
-    let useCount = context.globalState.get<number>('copyReferenceUseCount', 0);
+    const useCount = context.globalState.get<number>('copyReferenceUseCount', 0);
 
     if (useCount === showReminderAfterUses) {
         setTimeout(() => {

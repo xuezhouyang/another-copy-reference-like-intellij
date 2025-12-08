@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
  */
 export class TelemetryReporter {
     private static instance: TelemetryReporter;
-    private isEnabled: boolean = false;
+    private isEnabled = false;
     private events: Map<string, number> = new Map();
     private sessionStart: Date;
     private context?: vscode.ExtensionContext;

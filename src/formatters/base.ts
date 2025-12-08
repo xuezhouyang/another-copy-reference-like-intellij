@@ -26,7 +26,7 @@ export abstract class BaseFormatProvider implements IFormatProvider {
     /**
      * Helper: build symbol path string
      */
-    protected buildSymbolPath(variables: FormatVariables, separator: string = '.'): string {
+    protected buildSymbolPath(variables: FormatVariables, separator = '.'): string {
         const parts: string[] = [];
 
         if (variables.package) {
@@ -56,7 +56,7 @@ export abstract class BaseFormatProvider implements IFormatProvider {
     /**
      * Helper: format line number
      */
-    protected formatLineNumber(line?: number, prefix: string = ':'): string {
+    protected formatLineNumber(line?: number, prefix = ':'): string {
         return line ? `${prefix}${line}` : '';
     }
 }

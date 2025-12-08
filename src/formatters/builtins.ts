@@ -173,8 +173,8 @@ export class StackTraceFormatProvider extends BaseFormatProvider {
 export class CustomFormatProvider extends BaseFormatProvider {
     constructor(
         private template: string,
-        displayName: string = 'Custom Format',
-        description: string = 'User-defined format'
+        displayName = 'Custom Format',
+        description = 'User-defined format'
     ) {
         super(
             ReferenceFormatType.CUSTOM,

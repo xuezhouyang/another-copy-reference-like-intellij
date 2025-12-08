@@ -32,8 +32,8 @@ export class BenchmarkRunner {
     async runBenchmark(
         name: string,
         fn: () => Promise<void>,
-        iterations: number = 100,
-        warmup: number = 10
+        iterations = 100,
+        warmup = 10
     ): Promise<BenchmarkResult> {
         console.log(`Running benchmark: ${name}`);
 
@@ -526,8 +526,8 @@ export function registerBenchmarkCommand(context: vscode.ExtensionContext): void
         if (answer === 'Yes') {
             vscode.window.showInformationMessage('Running performance benchmarks...');
             // Import handler registry and run benchmarks
-            const { handlerRegistry } = require('../extension');
-            const handlers = handlerRegistry.getAllHandlers();
+            const extension = await import('../extension');
+            const handlers = extension.handlerRegistry.getAllHandlers();
             await runAllBenchmarks(handlers);
             vscode.window.showInformationMessage('Benchmarks complete. Check the output channel for results.');
         }
