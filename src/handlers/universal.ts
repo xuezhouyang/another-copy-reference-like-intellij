@@ -139,7 +139,7 @@ export class UniversalHandler extends BaseLanguageHandler {
      */
     private buildSymbolReference(
         document: vscode.TextDocument,
-        position: vscode.Position,
+        _position: vscode.Position,
         parents: vscode.DocumentSymbol[],
         symbol?: vscode.DocumentSymbol
     ): ReferenceFormat | null {
