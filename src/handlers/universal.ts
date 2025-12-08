@@ -33,22 +33,20 @@ export class UniversalHandler extends BaseLanguageHandler {
             'UniversalHandler.extractReference',
             async () => {
                 try {
-                    // Get relative file path
-                    const filePath = this.getFilePath(document);
+                    // Try to build a symbol-based reference first
+                    const symbols = await this.getDocumentSymbols(document);
 
-                    // Get position information
-                    const line = position.line + 1; // Convert to 1-based
-                    const column = position.character + 1; // Convert to 1-based
+                    if (symbols && symbols.length > 0) {
+                        const { symbol, parents } = this.findSymbolAtPosition(symbols, position);
+                        const symbolReference = this.buildSymbolReference(document, position, parents, symbol);
 
-                    // Create fallback format reference
-                    return new ReferenceFormat(
-                        filePath,
-                        'fallback',
-                        undefined,  // No symbol path for fallback
-                        ':',        // Use colon separator for fallback
-                        line,
-                        column
-                    );
+                        if (symbolReference) {
+                            return symbolReference;
+                        }
+                    }
+
+                    // Fall back to position-based reference
+                    return this.buildFallbackReference(document, position);
                 } catch (error) {
                     console.error('Failed to extract universal reference:', error);
                     return null;
@@ -92,20 +90,20 @@ export class UniversalHandler extends BaseLanguageHandler {
      * Format reference (required by base class)
      */
     protected formatReference(context: SymbolContext): ReferenceFormat | null {
-        // Universal handler uses position-based format, not symbol-based
-        // Create a fallback format reference
-        const filePath = this.getFilePath(context.document);
-        const line = context.position.line + 1;
-        const column = context.position.character + 1;
-
-        return new ReferenceFormat(
-            filePath,
-            'fallback',
-            undefined,  // No symbol path
-            ':',        // Use colon separator
-            line,
-            column
+        // Try to format using the resolved symbol context first
+        const reference = this.buildSymbolReference(
+            context.document,
+            context.position,
+            context.parentSymbols,
+            context.symbol
         );
+
+        if (reference) {
+            return reference;
+        }
+
+        // Fallback to position-based reference
+        return this.buildFallbackReference(context.document, context.position);
     }
 
     /**
@@ -134,5 +132,100 @@ export class UniversalHandler extends BaseLanguageHandler {
     ): Promise<ReferenceFormat | null> {
         // Universal handler doesn't use symbols, just position
         return this.extractReference(document, position);
+    }
+
+    /**
+     * Build a symbol-based reference if possible
+     */
+    private buildSymbolReference(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        parents: vscode.DocumentSymbol[],
+        symbol?: vscode.DocumentSymbol
+    ): ReferenceFormat | null {
+        const symbolPath = this.buildSymbolPath(parents, symbol);
+
+        if (symbolPath.length === 0) {
+            return null;
+        }
+
+        const modulePath = this.getModulePath(document, parents);
+
+        return new ReferenceFormat(
+            modulePath,
+            'standard',
+            symbolPath,
+            '#',
+            undefined,
+            undefined,
+            modulePath
+        );
+    }
+
+    /**
+     * Build symbol path while filtering out package/module entries
+     */
+    private buildSymbolPath(
+        parents: vscode.DocumentSymbol[],
+        symbol?: vscode.DocumentSymbol
+    ): string[] {
+        const packageIndex = parents.findIndex(parent =>
+            parent.kind === vscode.SymbolKind.Package ||
+            parent.kind === vscode.SymbolKind.Namespace ||
+            parent.kind === vscode.SymbolKind.Module
+        );
+
+        const pathParts = parents.map(parent => parent.name);
+
+        if (symbol) {
+            pathParts.push(symbol.name);
+        }
+
+        // Remove package/module entries from symbol path (they are represented in modulePath)
+        if (packageIndex >= 0) {
+            return pathParts.slice(packageIndex + 1);
+        }
+
+        return pathParts;
+    }
+
+    /**
+     * Determine module path for symbol-based references
+     */
+    private getModulePath(document: vscode.TextDocument, parents: vscode.DocumentSymbol[]): string {
+        const packageSymbol = parents.find(parent =>
+            parent.kind === vscode.SymbolKind.Package ||
+            parent.kind === vscode.SymbolKind.Namespace ||
+            parent.kind === vscode.SymbolKind.Module
+        );
+
+        if (packageSymbol) {
+            return packageSymbol.name;
+        }
+
+        // Use file path without extension when no package information is available
+        const relativePath = this.getFilePath(document);
+        return relativePath.replace(/\.[^.]+$/, '');
+    }
+
+    /**
+     * Create a fallback reference using line and column information
+     */
+    private buildFallbackReference(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ): ReferenceFormat {
+        const filePath = this.getFilePath(document);
+        const line = position.line + 1;
+        const column = position.character + 1;
+
+        return new ReferenceFormat(
+            filePath,
+            'fallback',
+            undefined,  // No symbol path for fallback
+            ':',        // Use colon separator for fallback
+            line,
+            column
+        );
     }
 }
