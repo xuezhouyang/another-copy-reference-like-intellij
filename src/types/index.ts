@@ -154,7 +154,7 @@ export interface PatternConfig {
  */
 export class CacheEntry {
     public timestamp: Date;
-    public accessCount: number = 0;
+    public accessCount = 0;
 
     constructor(
         public documentUri: string,

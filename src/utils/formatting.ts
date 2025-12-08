@@ -86,7 +86,7 @@ export class ReferenceFormatter {
     /**
      * Format symbol path with separator
      */
-    static formatSymbolPath(symbols: string[], separator: string = '.'): string {
+    static formatSymbolPath(symbols: string[], separator = '.'): string {
         return symbols
             .filter(s => s && s.length > 0)
             .join(separator);
@@ -120,7 +120,7 @@ export class ReferenceFormatter {
     /**
      * Truncate long references
      */
-    static truncateReference(reference: string, maxLength: number = 500): string {
+    static truncateReference(reference: string, maxLength = 500): string {
         if (reference.length <= maxLength) {
             return reference;
         }

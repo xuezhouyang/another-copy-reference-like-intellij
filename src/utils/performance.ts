@@ -7,6 +7,7 @@ export class PerformanceMonitor {
     private readonly maxMetricsPerKey = 100;
     private readonly performanceThreshold = 100; // milliseconds
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     private constructor() {}
 
     /**
